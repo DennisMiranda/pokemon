@@ -1,0 +1,53 @@
+---
+import type { GetStaticPaths } from "astro";
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const res = await fetch("https://pokeapi.co/api/v2/pokemon?limit=16");
+  const data = await res.json();
+
+  return data.results.map((pokemon) => ({
+    params: { name: pokemon.name },
+  }));
+}
+
+const { name } = Astro.params;
+const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
+const info = await res.json();
+
+const pokemon = {
+  name: info.name,
+  image: info.sprites.other["official-artwork"].front_default,
+  types: info.types.map((t) => t.type.name),
+  weight: info.weight,
+  height: info.height,
+  stats: info.stats,
+  baseExp: info.base_experience,
+};
+---
+
+<Layout title={`Detalles de ${pokemon.name}`}>
+  <div class="flex flex-col items-center gap-4">
+    <img src={pokemon.image} alt={pokemon.name} class="w-48 h-48" />
+    <h1 class="text-3xl font-bold capitalize">{pokemon.name}</h1>
+    <div class="flex gap-2">
+      {
+        pokemon.types.map((type) => (
+          <span class="text-sm bg-yellow-400 text-gray-900 px-3 py-1 rounded-full">
+            {type}
+          </span>
+        ))
+      }
+    </div>
+
+    <p class="text-sm">Altura:{pokemon.height / 10} m</p>
+    <p class="text-sm">Peso:{pokemon.weight / 10}kg</p>
+    <p class="text-sm">Base de Exp:{pokemon.height / 10} m</p>
+
+    <p class="text-sm">Altura:{pokemon.baseExp} m</p>
+
+    <a href="/" class="mt-4 text-yellow-400 underline hover:text-yellow-300"
+      >Volver a Inicio</a
+    >
+  </div>
+</Layout>
